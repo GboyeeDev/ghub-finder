@@ -9,16 +9,16 @@ const GITHUB_TOKEN = import.meta.env.VITE_GITHUB_TOKEN;
 export const GithubProvider = ({ children }) => {
   const initialState = {
     users: [],
-    isLoading: false
-  }
+    user: {},
+    isLoading: false,
+  };
 
   const [state, dispatch] = useReducer(githubReducer, initialState);
-
 
   // Fetch users from backend
   // const fetchUsers = async () => {
   //   setIsLoading()
-    
+
   //   const response = await fetch(`${GITHUB_URL}/users`, {
   //     headers: {
   //       Authorization: `token ${GITHUB_TOKEN}`,
@@ -38,7 +38,7 @@ export const GithubProvider = ({ children }) => {
     setIsLoading();
 
     const params = new URLSearchParams({
-      q: text
+      q: text,
     });
 
     const response = await fetch(`${GITHUB_URL}/search/users?${params}`, {
@@ -47,34 +47,58 @@ export const GithubProvider = ({ children }) => {
       },
     });
 
-
     // I am getting items from github api
     const { items } = await response.json();
 
     dispatch({
       type: 'GET_USERS',
       payload: items,
-    })
+    });
+  };
+
+  // Get a single User
+  const getUser = async (login) => {
+    setIsLoading();
+
+    const response = await fetch(`${GITHUB_URL}/users/${login}`, {
+      headers: {
+        Authorization: `token ${GITHUB_TOKEN}`,
+      },
+    });
+
+    if (response.status === '') {
+      window.location = '/notfound';
+    } else {
+      // I am getting items from github api
+      const data = await response.json();
+
+      dispatch({
+        type: 'GET_USER',
+        payload: data,
+      });
+    }
   };
 
   // to clear users when they are done searching
-  const clearUsers = () => dispatch({
-    type: 'CLEAR_USERS'
-  })
+  const clearUsers = () =>
+    dispatch({
+      type: 'CLEAR_USERS',
+    });
 
   // set isLoading into function so it can be used easily
   const setIsLoading = () => {
-    dispatch({type: 'SET_ISLOADING'})
+    dispatch({ type: 'SET_ISLOADING' });
   };
-
 
   return (
     <GithubContext.Provider
       value={{
         users: state.users,
+        user: state.user,
         isLoading: state.isLoading,
         searchUsers,
-        clearUsers
+        clearUsers,
+        getUser,
       }}
     >
       {children}
