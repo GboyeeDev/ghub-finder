@@ -1,0 +1,68 @@
+//without axios
+
+
+const GITHUB_URL = import.meta.env.VITE_GITHUB_URL;
+const GITHUB_TOKEN = import.meta.env.VITE_GITHUB_TOKEN;
+
+
+
+// Search users from the api
+export const searchUsers = async (text) => {
+  //setIsLoading();
+
+  const params = new URLSearchParams({
+    q: text,
+  });
+
+  const response = await fetch(`${GITHUB_URL}/search/users?${params}`, {
+    headers: {
+      Authorization: `token ${GITHUB_TOKEN}`,
+    },
+  });
+
+  // I am getting items from github api
+  const { items } = await response.json();
+
+  return items;
+};
+
+// Get a single User
+export const getUser = async (login) => {
+  //setIsLoading();
+
+  const response = await fetch(`${GITHUB_URL}/users/${login}`, {
+    headers: {
+      Authorization: `token ${GITHUB_TOKEN}`,
+    },
+  });
+
+  if (response.status === '') {
+    window.location = '/notfound';
+  } else {
+    // I am getting items from github api
+    const data = await response.json();
+
+    return data;
+  }
+};
+
+//Get Repos
+export const getRepos = async (login) => {
+  //setIsLoading();
+
+  const params = new URLSearchParams({
+    sort: 'created',
+    per_page: 10,
+  });
+
+  const response = await fetch(`${GITHUB_URL}/users/${login}/repos?${params}`, {
+    headers: {
+      Authorization: `token ${GITHUB_TOKEN}`,
+    },
+  });
+
+  // I am getting items from github api
+  const data = await response.json();
+
+  return data;
+};
